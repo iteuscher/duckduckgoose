@@ -1,92 +1,70 @@
-document.getElementById("weatherSubmit").addEventListener("click", function(event) {
-  event.preventDefault();
-  const value = document.getElementById("weatherInput").value;
-  if (value === "")
-    return;
-  console.log(value);
+let clicks = 0;
+let resetNextTime = false;
 
-  // call the Open Weather API
-    const url = "https://api.openweathermap.org/data/2.5/weather?q=" + value + ",US&units=imperial" + "&APPID=d22e100c0b841d5b9724817b04c264ef";
+document.getElementById("submit").addEventListener("click", function(event) {
+  event.preventDefault();
+
+  if (resetNextTime) {
+    clicks = 0;
+    document.getElementById("clicks").innerHTML = " 0 clicks";
+    resetNextTime = false;
+  }
+
+
+  //math.random number 1-10 
+  let randNumber = Math.random() * 10
+  console.log("Random Number (1-10) is: " + randNumber)
+
+  //  1/10 times give goose
+  if (randNumber < 1)
+  {
+    document.getElementById("results").innerHTML = "<h2> Goose!! </h2> <img style='width: 100%' src='images/greylag-goose-g45cd056eb_1920.jpg' alt='goose image' />" ;
+    let totalClicks = clicks;
+    clicks = "Found a goose in " + totalClicks;
+    resetNextTime = true;
+  }
+
+
+  // 9 times out of 10 return a duck. 
+  else 
+  {
+    // document.getElementById("results").innerHTML = "<h2> Duck </h2> <img src='images/duck400.jpeg' alt='goose image' />" ;
+    clicks++;
+
+  // call the random dog API
+  const url = "https://random.dog/woof.json";
     fetch(url)
     .then(function(response) {
         return response.json();
     }).then(function(json) {
-        
+        // let json = response.json();
         console.log(json);
 
         // FORMAT JSON AS HTML
         let results = "";
-        results += '<h3>Weather in ' + json.name + "</h3>";
-        for (let i=0; i < json.weather.length; i++) {
-          results += '<img src="http://openweathermap.org/img/w/' + json.weather[i].icon + '.png"/>';
+
+        if (json.url.includes('.mp4'))
+        {
+          results +='<h2> Dog </h2> <video style= "max-width: 100%; max-height: 80vh;" controls="controls">';
+          results += '<source src=" ' + json.url + ' " type="video/mp4" />';
+          results += 'Your browser does not support the <video> tag';
+          results += '</video>';
         }
-        results += '<h3>' + json.main.temp + " &deg;F</h3>"
-        results += "<p>"
-
-        // max and min
-        results +=  "Max: " + json.main.temp_max + "&deg;F</h3>" + " Min: " + json.main.temp_min + "&deg;F</h3>" +`<br>`;
-
-        for (let i=0; i < json.weather.length; i++) {
-            results += json.weather[i].description
-            if (i !== json.weather.length - 1)
-            results += ", "
+        
+        else
+        {
+          results += '<h2> Dog </h2> <img style= "max-width: 100%; max-height: 80vh;" src= "';
+          results += json.url;
+          results += '" />';
         }
 
-        // wind
-        results += `<br>` + "Wind Speed: " + json.wind.speed + " mph";
-
-        // humidity
-        results += `<br>` + "Humidity: " + json.main.humidity + "%";
-
-        results += "</p>";
-        document.getElementById("weatherResults").innerHTML = results;
+        document.getElementById("results").innerHTML = results;
 
     });
 
+  }
 
-/* --------------
-   5 Day Forecast (below)
-   --------------- */
-
-  const url2 = "https://api.openweathermap.org/data/2.5/forecast?q=" + value + ", US&units=imperial" + "&APPID=d22e100c0b841d5b9724817b04c264ef";
-  fetch(url2)
-    .then(function(response) {
-      return response.json();
-    }).then(function(json) {
-      console.log(json);
-
-      // FORMAT JSON AS HTML
-    let forecast = "";
-
-    for (let i=0; i<40; i+=8) //0,8,16,24,32,40
-    {
-        let counter = 0;
-        forecast += "<div class='col'> <h5>" + moment(json.list[i].dt_txt).format('MMMM Do') + "</h5>";
-        for (let j=i; j < (i+8); j++) {
-            if (counter > 4) forecast += "<div style='color:white'>" + moment(json.list[j].dt_txt).format('h a') + "";
-            else if (counter > 1) forecast += "<div style='color:beige'>" + moment(json.list[j].dt_txt).format('h a') + "";
-            else forecast += "<div style='color:black'>" + moment(json.list[j].dt_txt).format('h a') + "";
-            forecast += '<img src="http://openweathermap.org/img/w/' + json.list[j].weather[0].icon + '.png"/>'
-            forecast += "<br> Temp: " + json.list[j].main.temp + "&deg;F</h3>";
-             // wind
-            forecast += `<br>` + "Wind: " + json.list[j].wind.speed + " mph";
-            // humidity
-            forecast += `<br>` + "Humidity: " + json.list[j].main.humidity + "%";
-            forecast += "</div> <br>"
-            counter++;
-        }
-        forecast += "</div>";
-    }
-
-    
-
-
-    document.getElementById("forecastResults").innerHTML = forecast;
-
-    });
-
-
-
-
+  if (clicks==1) document.getElementById("clicks").innerHTML = " " + clicks + " click"; 
+  else document.getElementById("clicks").innerHTML = " " + clicks + " clicks";
 
 });
